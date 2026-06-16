@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIEP Secure Shop - Cliente Base</title>
+    <style>
+        :root { --azul: #002D62; --rojo: #B40000; --gris: #f4f6f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--gris); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        header { background: var(--azul); color: white; padding: 15px; text-align: center; border-radius: 6px; margin-bottom: 20px; }
+        header h1 { margin: 0; font-size: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { color: var(--azul); border-bottom: 2px solid var(--gris); padding-bottom: 8px; margin-top: 0; font-size: 18px; }
+        input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: var(--azul); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        button:hover { background: #001f44; }
+        button.btn-rojo { background: var(--rojo); }
+        button.btn-rojo:hover { background: #900000; }
+        .product-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: var(--gris); border-radius: 4px; }
+        .console { background: #222; color: #00ff00; font-family: monospace; padding: 15px; border-radius: 6px; grid-column: 1 / -1; min-height: 120px; max-height: 250px; overflow-y: auto; font-size: 12px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🛒 Plataforma de Comercio Electrónico Segura — Escuela de Ingeniería AIEP</h1>
+    </header>
+    <div class="container">
+        <div class="card">
+            <h2>🔐 1. Inicio de Sesión Seguro</h2>
+            <p style="font-size: 12px; color: #666; margin-top:-5px;">Simulación de flujo OAuth2 / JWT</p>
+            <label>Usuario de Prueba:</label>
+            <input type="text" id="username" value="admin">
+            <label>Contraseña:</label>
+            <input type="password" id="password" value="1234">
+            <button onclick="ejecutarLogin()">Iniciar Sesión y Obtener Token</button>
+            <div id="login-status" style="margin-top: 10px; font-weight: bold;"></div>
+        </div>
+        <div class="card">
+            <h2>🛍️ 2. Carro de Compras Temporal</h2>
+            <p style="font-size: 12px; color: #666; margin-top:-5px;">Parámetros de Integración e-Commerce</p>
+            <div class="product-list">
+                <div class="product-item">
+                    <span>👟 Zapatillas Urbanas ($45.000)</span>
+                    <input type="checkbox" id="prod-1" value="1" checked style="width:auto; margin:0;">
+                </div>
+                <div class="product-item">
+                    <span>👕 Polera Deportiva ($15.000)</span>
+                    <input type="checkbox" id="prod-2" value="2" checked style="width:auto; margin:0;">
+                </div>
+            </div>
+            <button class="btn-rojo" onclick="ejecutarCheckout()">Enviar Carro Seguro (Checkout)</button>
+            <div id="checkout-status" style="margin-top: 10px; font-weight: bold;"></div>
+        </div>
+        <div class="console" id="console-log">&gt; Esperando acciones del usuario...</div>
+    </div>
+    <script>
+        const API_URL = "https://localhost:8443/api";
+        function actualizarConsola(endpoint, metodo, status, datos) {
+            const consola = document.getElementById("console-log");
+            consola.innerText = `[PETICIÓN HTTP] \${metodo} -> \${API_URL}\${endpoint}\n` +
+                              `[ESTADO RESPUESTA] HTTP Status: \${status}\n` +
+                              `[CUERPO DE RESPUESTA JSON]:\n\${JSON.stringify(datos, null, 2)}`;
+        }
+        async function ejecutarLogin() {
+            const user = document.getElementById("username").value;
+            const pass = document.getElementById("password").value;
+            const statusDiv = document.getElementById("login-status");
+            try {
+                const respuesta = await fetch(`\${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario: user, contrasena: pass })
+                });
+                const data = await respuesta.json();
+                actualizarConsola("/login", "POST", respuesta.status, data);
+                if (respuesta.ok) {
+                    sessionStorage.setItem('token', data.token);
+                    statusDiv.innerHTML = `<span style="color: #28a745;">✓ Token JWT Guardado en SessionStorage</span>`;
+                } else {
+                    statusDiv.innerHTML = `<span style="color: #B40000;">❌ Error: \${data.mensaje}</span>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<span style="color: #B40000;">❌ Error de red: ¿Encendiste tu servidor HTTPS (Puerto 8443)?</span>`;
+            }
+        }
+        async function ejecutarCheckout() {
+            const statusDiv = document.getElementById("checkout-status");
+            const token = sessionStorage.getItem('token');
+            const carro = [];
+            if(document.getElementById("prod-1").checked) carro.push(parseInt(document.getElementById("prod-1").value));
+            if(document.getElementById("prod-2").checked) carro.push(parseInt(document.getElementById("prod-2").value));
+            try {
+                const respuesta = await fetch(`\${API_URL}/checkout`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer \${token}`
+                    },
+                    body: JSON.stringify({ carro: carro })
+                });
+                const data = await respuesta.json();
+                actualizarConsola("/checkout", "POST", respuesta.status, data);
+                if (respuesta.ok) {
+                    statusDiv.innerHTML = `<span style="color: #28a745;">✓ Aprobado por Pasarela de Pago</span>`;
+                } else {
+                    statusDiv.innerHTML = `<span style="color: #B40000;">❌ Error en checkout (Código \${respuesta.status})</span>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<span style="color: #B40000;">❌ Error de conexión con el Backend</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
