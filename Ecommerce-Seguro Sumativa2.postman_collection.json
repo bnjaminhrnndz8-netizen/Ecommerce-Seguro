@@ -1,0 +1,51 @@
+{
+  "info": {
+    "_postman_id": "e321d267-8ef6-4165-804a-e3e2fdad0931",
+    "name": "Ecommerce-Seguro Sumativa2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55491858",
+    "_collection_link": "https://go.postman.co/collection/55491858-e321d267-8ef6-4165-804a-e3e2fdad0931?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Obtener productos",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Inicio sesión",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Procesar pago (Checkout seguro)",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Procesar pago (Falta de token)",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Procesar pago (Carro vacío)",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ]
+}
