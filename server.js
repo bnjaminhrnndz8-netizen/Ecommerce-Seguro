@@ -8,6 +8,7 @@ const path = require('path');
 // 2. Importación de Rutas del Patrón MVC
 const productoRoutes = require('./src/routes/productoRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const checkoutRoutes = require('./src/routes/checkoutRoutes');
 
 // 3. Inicialización de la aplicación Express
 const app = express();
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname)));
 // Las rutas de productos se servirán bajo el prefijo '/api' para mantener la API ordenada (ej: https://localhost:8443/api/productos)
 app.use('/api', productoRoutes);
 app.use('/api', authRoutes);
+app.use('/api', checkoutRoutes);
 
 // Servir el archivo frontend "index.html" de forma estática cuando se acceda a la raíz "/"
 app.get('/', (req, res) => {
